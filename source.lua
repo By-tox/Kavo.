@@ -17,7 +17,46 @@ local run = game:GetService("RunService")
 local Utility = {}
 local Objects = {}
 function Kavo:DraggingEnabled(frame, parent)
-        
+    parent = parent or frame
+
+    local dragging = false
+    local dragInput, touchInput, startPos, frameStart
+
+    frame.InputBegan:Connect(function(inputObj)
+        if inputObj.UserInputType == Enum.UserInputType.MouseButton1
+            or inputObj.UserInputType == Enum.UserInputType.Touch then
+
+            dragging = true
+            startPos = inputObj.Position
+            frameStart = parent.Position
+
+            inputObj.Changed:Connect(function()
+                if inputObj.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    frame.InputChanged:Connect(function(inputObj)
+        if inputObj.UserInputType == Enum.UserInputType.MouseMovement
+            or inputObj.UserInputType == Enum.UserInputType.Touch then
+            dragInput = inputObj
+        end
+    end)
+
+    input.InputChanged:Connect(function(inputObj)
+        if inputObj == dragInput and dragging then
+            local delta = inputObj.Position - startPos
+            parent.Position = UDim2.new(
+                frameStart.X.Scale,
+                frameStart.X.Offset + delta.X,
+                frameStart.Y.Scale,
+                frameStart.Y.Offset + delta.Y
+            )
+        end
+    end)
+end
     parent = parent or frame
     
     -- stolen from wally or kiriot, kek
